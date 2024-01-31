@@ -39,7 +39,7 @@ jobs:
         steps:
             - name: print commit message
               env:
-                COMMIT_MSG: ${{ toJson(join(github.event.commits.*.messages, ' ')) }}
+                COMMIT_MSG: ${{ join(github.event.commits.*.messages, ' ') }}
               run: echo $COMMIT_MSG
             - name: check if skip
               env:
