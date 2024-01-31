@@ -37,6 +37,14 @@ jobs:
         needs: [simple_deployment_pipeline]
         runs-on: ubuntu-20.04
         steps:
+            - name: print commit message
+              env:
+                COMMIT_MSG: ${{ toJson(join(github.event.commits.*.messages, ' ')) }}
+              run: echo $COMMIT_MSG
+            - name: check if skip
+              env:
+                IS_SKIP: ${{ toJson(contains(join(github.event.commits.*.messages, ' '), '#skip')) }}
+              run: echo $IS_SKIP
             - uses: actions/checkout@v4
             - name: Bump version and push tag
               if: ${{ github.event_name == 'push' && ! contains(join(github.event.commits.*.messages, ' '),  '#skip') }}
