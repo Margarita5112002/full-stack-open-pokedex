@@ -22,6 +22,13 @@ jobs:
               run: npm run eslint
             - name: Build
               run: npm run build
+            - name: notity if build fails
+              uses: rjstone/discord-webhook-notify@v1
+              if: failure()
+              with:
+                webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+                severity: error
+                details: Build fail
             - name: Test
               run: npm run test
             - name: e2e tests
@@ -33,6 +40,14 @@ jobs:
             - name: trigger deployment
               if: ${{!contains(github.event.head_commit.message, '#skip') && github.event_name == 'push'}}
               run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+            - name: notity if deployment was successful
+              uses: rjstone/discord-webhook-notify@v1
+              if: success()
+              with:
+                webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+                severity: info
+                details: Deploy succeeded
+
     tag_release:
         if: ${{!contains(github.event.head_commit.message, '#skip') && github.event_name == 'push'}}
         needs: [simple_deployment_pipeline]
@@ -40,7 +55,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Bump version and push tag
-              uses: anothrNick/github-tag-action@1.64.0
+              uses: anothrNick/github-tag-action@c360518fb8131e99795f8208f8a6105ceca55ec2
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 WITH_V: true
